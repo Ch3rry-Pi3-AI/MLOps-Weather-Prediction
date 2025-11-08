@@ -1,0 +1,139 @@
+# ===================================================================
+# 🌸 GitHub Actions — CI/CD Deployment to Google Kubernetes Engine (GKE)
+# ===================================================================
+# This workflow automates the full MLOps deployment process:
+#   1. Builds a Docker image for the Flask Iris Classifier app.
+#   2. Pushes the image to Google Artifact Registry.
+#   3. Connects to GKE using service account credentials.
+#   4. Applies Kubernetes manifests and rolls out the updated deployment.
+# -------------------------------------------------------------------
+
+name: CI/CD Deployment to GKE
+
+# -------------------------------------------------------------------
+# 🧩 Trigger Conditions
+# -------------------------------------------------------------------
+# This workflow runs automatically whenever code is pushed
+# to the 'main' branch.
+# -------------------------------------------------------------------
+on:
+  push:
+    branches: [ main ]
+
+# -------------------------------------------------------------------
+# ⚙️ Global Environment Variables
+# -------------------------------------------------------------------
+# These values define the GCP project, cluster, and image paths.
+# Secrets (like GCP_PROJECT_ID and GCP_SA_KEY) must be configured
+# in your GitHub repository → Settings → Secrets → Actions.
+# -------------------------------------------------------------------
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GKE_CLUSTER: autopilot-cluster-1
+  GKE_REGION: us-central1
+  DEPLOYMENT_NAME: mlops-iris-iii
+  REPOSITORY: us-central1-docker.pkg.dev/sacred-garden-474511-b9/mlops-weather-prediction
+  IMAGE: us-central1-docker.pkg.dev/sacred-garden-474511-b9/mlops-weather-prediction/mlops-weather-prediction
+
+  # Required for GKE authentication (modern client-go plugin)
+  USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
+
+# -------------------------------------------------------------------
+# 🚀 Main Job — Build and Deploy to GKE
+# -------------------------------------------------------------------
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read         # Allows access to repository code
+      id-token: write        # Enables OIDC authentication if needed later
+
+    steps:
+      # -------------------------------------------------------------
+      # 🧾 Step 1: Checkout Repository
+      # -------------------------------------------------------------
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------------
+      # 🔐 Step 2: Authenticate with Google Cloud
+      # -------------------------------------------------------------
+      # Uses your GCP Service Account key stored as a GitHub secret.
+      # -------------------------------------------------------------
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # -------------------------------------------------------------
+      # ☁️ Step 3: Install Google Cloud SDK + kubectl + GKE Auth Plugin
+      # -------------------------------------------------------------
+      # Installs the required CLI tools for GCP + Kubernetes interaction.
+      # -------------------------------------------------------------
+      - name: Setup Google Cloud SDK and Tools
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: ">= 478.0.0"
+          install_components: "kubectl,gke-gcloud-auth-plugin"
+
+      # -------------------------------------------------------------
+      # 🧰 Step 4: Configure Docker Authentication for Artifact Registry
+      # -------------------------------------------------------------
+      # This ensures Docker can push to your Artifact Registry repository.
+      # -------------------------------------------------------------
+      - name: Configure Artifact Registry Authentication
+        run: |
+          gcloud config set project "$PROJECT_ID"
+          gcloud auth configure-docker us-central1-docker.pkg.dev -q
+
+      # -------------------------------------------------------------
+      # 🏗️ Step 5: Enable Docker Buildx (for efficient multi-platform builds)
+      # -------------------------------------------------------------
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # -------------------------------------------------------------
+      # 🧱 Step 6: Build and Push Docker Image to Artifact Registry
+      # -------------------------------------------------------------
+      # Builds the app image using the repository code and pushes
+      # both a SHA-specific tag and a 'latest' tag.
+      # -------------------------------------------------------------
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+
+      # -------------------------------------------------------------
+      # 🌐 Step 7: Retrieve GKE Cluster Credentials
+      # -------------------------------------------------------------
+      # Allows kubectl to communicate with your specific GKE cluster.
+      # -------------------------------------------------------------
+      - name: Fetch GKE Cluster Credentials
+        run: |
+          gcloud container clusters get-credentials "$GKE_CLUSTER" \
+            --region "$GKE_REGION" --project "$PROJECT_ID"
+
+      # -------------------------------------------------------------
+      # 🧩 Step 8: Apply Kubernetes Deployment & Service Manifests
+      # -------------------------------------------------------------
+      # Creates or updates Kubernetes resources defined in your YAML.
+      # -------------------------------------------------------------
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f kubernetes-deployment.yaml
+
+      # -------------------------------------------------------------
+      # 🔁 Step 9: Update Deployment Image and Wait for Rollout
+      # -------------------------------------------------------------
+      # Updates the running pods to use the new image and waits
+      # until the rollout is successfully completed.
+      # -------------------------------------------------------------
+      - name: Rollout New Application Version
+        run: |
+          kubectl set image deployment/${DEPLOYMENT_NAME} \
+            ${DEPLOYMENT_NAME}=${IMAGE}:${GITHUB_SHA}
+          kubectl rollout status deployment/${DEPLOYMENT_NAME} --timeout=120s
