@@ -1,137 +1,144 @@
-# 🌤️ **Flask Web Application — MLOps Weather Prediction**
+# ☁️ **Google Cloud Platform (GCP) Setup — MLOps Weather Prediction**
 
-This branch extends the **MLOps Weather Prediction** project into its **fourth stage**, introducing a fully interactive **Flask web application** for **inference and model serving**.
-Users can now interact with the trained weather prediction model via a **simple, intuitive interface** that estimates **whether it will rain tomorrow** based on a few daily observations.
+This stage introduces **Google Cloud Platform (GCP)** configuration for the **MLOps Weather Prediction** project.
+The setup prepares the cloud infrastructure necessary for deploying containerised machine learning workflows and the **Flask weather prediction app** using **Kubernetes (GKE)**, **Artifact Registry**, and **Service Accounts** with secure IAM permissions.
 
-## 🧠 **Overview**
+By completing this stage, your environment will be fully configured to build, store, and deploy Docker containers directly from your **GitLab CI/CD pipelines** into a **GKE Autopilot** cluster within the **us-central1 (Iowa)** region.
 
-The **Flask application** acts as the **inference layer** of the MLOps pipeline.
-It connects the trained XGBoost model (saved under `artifacts/models/model.pkl`) to an easy-to-use web frontend, enabling real-time predictions through a clean and responsive UI.
+## 🌐 Overview
 
-The system is designed with **non-technical users** in mind — only essential inputs (like temperature, humidity, and wind) are required, while all other meteorological features are **intelligently inferred** under the hood.
+This GCP configuration involves five essential steps:
 
-### 🔍 Core Responsibilities
+1. Enabling required APIs
+2. Creating an Artifact Registry repository
+3. Setting up a Service Account and generating a JSON key
+4. Creating a Kubernetes Autopilot cluster
+5. Ensuring regional consistency and secure network access
 
-| Stage | Component           | Description                                                              |
-| ----: | ------------------- | ------------------------------------------------------------------------ |
-|   1️⃣ | **Frontend (UI)**   | Interactive form built with HTML/CSS (Poppins theme, responsive grid).   |
-|   2️⃣ | **Backend (Flask)** | Handles routing, form validation, and feature inference logic.           |
-|   3️⃣ | **Model Inference** | Loads the pre-trained XGBoost model to predict “Rain Tomorrow” (Yes/No). |
-|   4️⃣ | **Result Display**  | Renders human-readable prediction output in a styled result card.        |
+Each step ensures the environment is cloud-ready, secure, and aligned for **MLOps deployment**.
 
-## 🗂️ **Updated Project Structure**
+## 1️⃣ Enable Required APIs
 
-```text
-mlops_weather_prediction/
-├── artifacts/
-│   ├── raw/                       # 🌦️ Input dataset
-│   ├── processed/                 # 💾 Preprocessed train/test data
-│   └── models/
-│       └── model.pkl              # 🧠 Trained XGBoost model used for inference
-├── pipeline/
-│   └── training_pipeline.py       # 🔄 Orchestrates full preprocessing + training workflow
-├── src/
-│   ├── data_processing.py         # 🌦️ Data preparation logic
-│   ├── model_training.py          # ⚙️ Model training and evaluation
-│   ├── logger.py                  # 🪵 Centralised logging
-│   └── custom_exception.py        # ⚠️ Structured error handling
-├── templates/
-│   └── index.html                 # 🧩 Frontend page with input form and result display
-├── static/
-│   ├── style.css                  # 🎨 Styling for the web interface
-│   └── img/
-│       └── app_background.jpg     # 🌅 Background image (lightly faded overlay)
-├── app.py                         # 🚀 Flask application (inference serving entrypoint)
-├── requirements.txt               # 📦 Project dependencies
-└── pyproject.toml                 # ⚙️ Project metadata and uv configuration
-```
+Visit your [Google Cloud Console](https://console.cloud.google.com) and open:
+**Navigation Menu → APIs & Services → Library**
 
-## ⚙️ **How to Run the Flask Application**
+Enable the following APIs:
 
-Make sure the trained model (`model.pkl`) exists in `artifacts/models/`, then run:
+* **Kubernetes Engine API**
+* **Google Container Registry API**
+* **Compute Engine API**
+* **Identity and Access Management (IAM) API**
+* **Cloud Build API**
+* **Cloud Storage API**
+
+Once enabled, you’ll see a confirmation screen like this:
+
+<p align="center">
+  <img src="img/gcp/api_enabled.png" alt="GCP API Enabled Example" style="width:100%; max-width:720px; height:auto;"/>
+</p>
+
+These APIs provide the core functionality required for building, storing, and deploying your application within GCP.
+
+## 2️⃣ Create an Artifact Registry Repository
+
+From the main GCP console, search for **“Artifact Registry”**.
+Click **+ Create Repository** and fill in the following details:
+
+* **Repository name:** `mlops-weather-prediction`
+* **Region:** `us-central1 (Iowa)`
+* **Format:** Docker
+* Leave other options as default.
+* Scroll to the bottom and click **Create**.
+
+<p align="center">
+  <img src="img/gcp/create_repo.png" alt="Create GCP Artifact Registry Repository" style="width:100%; max-width:720px; height:auto;"/>
+</p>
+
+This repository securely stores the Docker images for your Flask app and other pipeline artefacts that will later be deployed via GitLab CI/CD.
+
+## 3️⃣ Create a Service Account
+
+Go to **Navigation Menu → IAM & Admin → Service Accounts** and click **+ Create Service Account**.
+
+1. **Name:** `mlops-weather-prediction`
+2. Assign the following permissions under **Roles**:
+
+   * Artifact Registry Administrator
+   * Kubernetes Engine Developer
+   * Service Account User
+   * Storage Admin
+   * Compute Viewer
+
+<p align="center">
+  <img src="img/gcp/permissions.png" alt="Assign IAM Permissions" style="width:100%; max-width:720px; height:auto;"/>
+</p>
+
+Click **Create**. Once done, locate your new service account, click **Actions → Manage Keys → Add Key → Create new key**, and choose **JSON** as the key type.
+
+<p align="center">
+  <img src="img/gcp/create_key.png" alt="Create Service Account Key" style="width:100%; max-width:720px; height:auto;"/>
+</p>
+
+Click **Create** to download your JSON key file.
+Keep this file safe — it will later be used in your GitLab CI/CD environment to authenticate the pipeline with GCP services.
+
+## 4️⃣ Create a Kubernetes Autopilot Cluster
+
+Search for **“Kubernetes Engine”** in the GCP Console, then go to **Clusters** from the left sidebar.
+
+<p align="center">
+  <img src="img/gcp/cluster.png" alt="Kubernetes Engine Clusters" style="width:100%; max-width:720px; height:auto;"/>
+</p>
+
+Click **Create Cluster** and select **Autopilot** mode (recommended for managed workloads).
+
+<p align="center">
+  <img src="img/gcp/autopilot_cluster.png" alt="Autopilot Cluster Option" style="width:100%; max-width:720px; height:auto;"/>
+</p>
+
+In the **Cluster Basics** section:
+
+* **Cluster name:** `autopilot-cluster-1`
+* **Region:** `us-central1` (must match your Artifact Registry region)
+
+Under **Networking**, make sure both options are checked:
+
+* ✅ **Access using DNS**
+* ✅ **Access using IPv4 addresses**
+
+<p align="center">
+  <img src="img/gcp/networking.png" alt="Kubernetes Networking Configuration" style="width:100%; max-width:720px; height:auto;"/>
+</p>
+
+Keep advanced options as defaults and click **Create**.
+Cluster provisioning may take a few minutes. Wait until it reaches a **Running** state before continuing.
+
+## 5️⃣ Verify and Align Regions
+
+After your cluster and repository are created, verify that both share the **same region** (`us-central1`).
+This consistency ensures low latency and avoids cross-region deployment errors during CI/CD builds.
+
+You can confirm this by checking:
 
 ```bash
-python app.py
+gcloud artifacts repositories list
+gcloud container clusters list
 ```
 
-By default, the app runs locally at:
+## ✅ In Summary
 
-> 🌐 **[http://127.0.0.1:5000/](http://127.0.0.1:5000/)**
+By the end of this stage:
 
-To expose it for containerised or cloud testing, use:
+* All critical **GCP APIs** are active.
+* A secure **Artifact Registry** (`mlops-weather-prediction`) is ready to store Docker images.
+* A **Service Account** and JSON key are created for CI/CD authentication.
+* A **GKE Autopilot cluster** (`autopilot-cluster-1`) has been provisioned in `us-central1`.
+* Regional and network configurations are aligned for deployment.
 
-```bash
-python app.py --host=0.0.0.0
-```
+Your GCP environment is now ready for:
 
-### ✅ **Expected Runtime Output**
+* 🔁 Automated builds via **GitLab CI/CD**
+* 🐳 Containerised **Flask app deployments**
+* ☁️ Scalable MLOps infrastructure for retraining and continuous delivery
 
-```console
-2025-11-08 14:02:37,120 - INFO - Model loaded from artifacts/models/model.pkl
- * Running on http://127.0.0.1:5000 (Press CTRL+C to quit)
-127.0.0.1 - - [08/Nov/2025 14:02:58] "POST / HTTP/1.1" 200 -
-2025-11-08 14:02:58,441 - INFO - Prediction successful: Rain Tomorrow: No
-```
-
-## 🧩 **User Interface Overview**
-
-| Section             | Description                                                                                                                     |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| **Header**          | Displays project title and short subtitle guiding the user.                                                                     |
-| **Guidance Cards**  | Compact cards showing measurement units, value ranges, and notes about smart defaults.                                          |
-| **Input Form**      | Users provide minimal inputs: `Location`, `Date`, `MinTemp`, `MaxTemp`, `Humidity3pm`, `WindSpeed3pm`, and optional `Rainfall`. |
-| **Prediction Card** | Shows model output — “Rain Tomorrow: Yes” or “Rain Tomorrow: No” — styled with green or red accents.                            |
-
-### 💡 Smart Inference Behaviour
-
-The app **automatically infers** missing features like:
-
-* 🌞 **Sunshine hours**, ☁️ **Cloud cover**, 💨 **Wind direction**, and 📈 **Pressure**
-* 🕘 Morning/afternoon temperatures (`Temp9am`, `Temp3pm`)
-* 🌦️ `RainToday` boolean based on rainfall threshold (`> 0.2 mm`)
-
-This makes the interface lightweight and user-friendly without compromising prediction accuracy.
-
-## 🧠 **Implementation Highlights**
-
-* **End-to-End Integration:**
-  Connects the trained model directly to the Flask UI for live inference.
-
-* **Simplified User Inputs:**
-  Only key parameters are required; all other model features are inferred programmatically.
-
-* **Modern Design:**
-  The UI (`templates/index.html`) and stylesheet (`static/style.css`) create a clean, mobile-responsive interface using CSS Grid and variable-driven theming.
-
-* **Robust Backend Logic:**
-  The backend performs:
-
-  * Input validation (type + range)
-  * Feature inference (season-aware)
-  * Logging and exception handling for transparency
-
-* **Portable Deployment:**
-  Can be run locally, in Docker, or deployed to a cloud platform (e.g. GCP, AWS, Render).
-
-## 🧩 **Integration Overview**
-
-| File                         | Purpose                                                                         |
-| :--------------------------- | :------------------------------------------------------------------------------ |
-| `app.py`                     | Hosts the Flask app, routes requests, validates input, and handles predictions. |
-| `templates/index.html`       | Defines the frontend interface and Jinja2 placeholders for data binding.        |
-| `static/style.css`           | Provides theming, responsive layout, and UX enhancements.                       |
-| `artifacts/models/model.pkl` | Serialized XGBoost model loaded for prediction.                                 |
-| `src/logger.py`              | Logs runtime activity and errors for traceability.                              |
-| `src/custom_exception.py`    | Handles validation and inference exceptions with detailed context.              |
-
-## ✅ **In summary**
-
-This branch transforms the **MLOps Weather Prediction** project from a trained model into a **fully interactive, production-ready web application**.
-
-It enables end-users to:
-
-* Select their location and provide a few observations
-* Instantly receive an AI-driven weather prediction
-* Experience a clean, responsive UI powered by Flask
-
-With this stage complete, the project now supports **end-to-end model inference**, marking the transition from experimentation to **user-facing deployment**.
+This setup completes the **cloud infrastructure foundation** for the **MLOps Weather Prediction** project — enabling seamless, secure, and reproducible deployments to Google Cloud.
