@@ -3,7 +3,7 @@
 This stage introduces **Google Cloud Platform (GCP)** configuration for the **MLOps Weather Prediction** project.
 The setup prepares the cloud infrastructure necessary for deploying containerised machine learning workflows and the **Flask weather prediction app** using **Kubernetes (GKE)**, **Artifact Registry**, and **Service Accounts** with secure IAM permissions.
 
-By completing this stage, your environment will be fully configured to build, store, and deploy Docker containers directly from your **GitLab CI/CD pipelines** into a **GKE Autopilot** cluster within the **us-central1 (Iowa)** region.
+By completing this stage, your environment will be fully configured to build, store, and deploy Docker containers directly from your **GitHub Actions pipelines** into a **GKE Autopilot** cluster within the **us-central1 (Iowa)** region.
 
 ## 🌐 Overview
 
@@ -54,7 +54,7 @@ Click **+ Create Repository** and fill in the following details:
   <img src="img/gcp/create_repo.png" alt="Create GCP Artifact Registry Repository" style="width:100%; max-width:720px; height:auto;"/>
 </p>
 
-This repository securely stores the Docker images for your Flask app and other pipeline artefacts that will later be deployed via GitLab CI/CD.
+This repository securely stores the Docker images for your Flask app and other pipeline artefacts that will later be deployed via GitHub Actions.
 
 ## 3️⃣ Create a Service Account
 
@@ -80,7 +80,7 @@ Click **Create**. Once done, locate your new service account, click **Actions �
 </p>
 
 Click **Create** to download your JSON key file.
-Keep this file safe — it will later be used in your GitLab CI/CD environment to authenticate the pipeline with GCP services.
+Keep this file safe — it will later be used in your GitHub Actions environment to authenticate the pipeline with GCP services.
 
 ## 4️⃣ Create a Kubernetes Autopilot Cluster
 
@@ -137,7 +137,7 @@ By the end of this stage:
 
 Your GCP environment is now ready for:
 
-* 🔁 Automated builds via **GitLab CI/CD**
+* 🔁 Automated builds via **GitHub Actions**
 * 🐳 Containerised **Flask app deployments**
 * ☁️ Scalable MLOps infrastructure for retraining and continuous delivery
 
