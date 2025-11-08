@@ -58,3 +58,7 @@
 2025-11-08 12:32:16,677 - INFO - Model loaded from artifacts/models/model.pkl
 2025-11-08 12:32:18,611 - INFO - Model loaded from artifacts/models/model.pkl
 2025-11-08 12:32:22,812 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 13:32:55,078 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 13:32:57,012 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 13:34:13,548 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 13:35:27,413 - INFO - Prediction successful: Rain Tomorrow: No
