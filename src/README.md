@@ -1,21 +1,22 @@
-# `src/` README — Core Utilities (Custom Exception & Logger)
+# `src/` README — Core Utilities & Data Processing
 
-This folder contains **foundational utilities** for the **Weather Prediction MLOps pipeline**.
-These modules provide **consistent logging** and **structured error handling** across all workflow stages — including **data ingestion**, **preprocessing**, **model training**, **evaluation**, and **deployment**.
+This folder contains **foundational utilities** and **data-preparation logic** for the **Weather Prediction MLOps pipeline**.
+These modules provide **consistent logging**, **structured error handling**, and a **reproducible preprocessing workflow** that together form the technical backbone of the pipeline — from **data ingestion** to **model training** and **deployment**.
 
 ## 📁 Folder Overview
 
 ```text
 src/
 ├─ custom_exception.py   # Unified and detailed exception handling
-└─ logger.py             # Centralised logging configuration
+├─ logger.py             # Centralised logging configuration
+└─ data_processing.py    # Complete preprocessing and dataset preparation workflow
 ```
 
 ## ⚠️ `custom_exception.py` — Unified Error Handling
 
 ### Purpose
 
-Defines a **CustomException** class that captures detailed debugging context for any error that occurs in the pipeline — whether during **weather data ingestion**, **feature standardisation**, **model fitting**, or **API inference**.
+Defines a **CustomException** class that captures detailed debugging context for any error that occurs in the pipeline — whether during **weather data ingestion**, **feature engineering**, **model fitting**, or **API inference**.
 
 ### Key Features
 
@@ -52,7 +53,7 @@ Traceback (most recent call last):
 ValueError: Weather dataset is empty.
 ```
 
-This ensures all exceptions are reported in a **consistent, traceable format** across the Weather Prediction pipeline — from data preparation to model inference.
+This ensures all exceptions are reported in a **consistent, traceable format** across the Weather Prediction pipeline — from data preparation to inference.
 
 ## 🪵 `logger.py` — Centralised Logging
 
@@ -96,40 +97,60 @@ logger.error("Model training aborted due to invalid input features.")
 2025-11-06 12:04:33,009 - ERROR - Model training aborted due to invalid input features.
 ```
 
-## 🧩 Integration Guidelines
+## 🌦️ `data_processing.py` — End-to-End Data Preparation
 
-| Module Type        | Use `CustomException` for…                            | Use `get_logger` for…                                      |
-| ------------------ | ----------------------------------------------------- | ---------------------------------------------------------- |
-| Data Ingestion     | File loading failures, schema mismatches, empty files | File paths, record counts, schema summaries                |
-| Preprocessing      | Missing values, scaling or encoding errors            | Feature engineering, imputations, outlier handling         |
-| Model Training     | Invalid targets, convergence issues, NaNs in features | Training progress, hyperparameters, metrics per epoch      |
-| Evaluation         | Metric computation, output file issues                | Validation metrics, error analysis, performance summaries  |
-| Inference/Serving  | Invalid payloads, missing model artefacts             | Request summaries, predicted outputs, confidence intervals |
-| CI/CD & Scheduling | Failed task steps, API timeouts                       | Pipeline stage logs, run durations, cloud job statuses     |
+### Purpose
 
-**Tip:** Combine both tools for robust debugging and traceability:
+Implements the **`DataProcessing`** class, which automates the key steps in preparing weather data for machine learning.
+It performs **data loading**, **cleaning**, **feature extraction**, **encoding**, and **dataset splitting**, ensuring reproducible and consistent input for model training.
+
+### Key Features
+
+* Converts `Date` column into **Year, Month, and Day** components
+* Automatically distinguishes **categorical** and **numerical** columns
+* Applies **mean imputation** for missing numeric values
+* Applies **label encoding** to weather-related categorical features
+* Splits the dataset into **train/test** sets and saves them as `.pkl` artefacts
+
+### Example Usage
 
 ```python
-from src.logger import get_logger
-from src.custom_exception import CustomException
-import sys
+from src.data_processing import DataProcessing
 
-logger = get_logger(__name__)
-
-def forecast(model, X):
-    try:
-        logger.info(f"Inference started for {len(X)} weather records.")
-        predictions = model.predict(X)
-        logger.info("Weather prediction inference completed successfully.")
-        return predictions
-    except Exception as e:
-        logger.error("Inference step failed.")
-        raise CustomException("Weather prediction inference error", sys) from e
+processor = DataProcessing("artifacts/raw/data.csv", "artifacts/processed")
+processor.run()
 ```
+
+### Saved Artefacts
+
+* `X_train.pkl`, `X_test.pkl` — feature matrices
+* `y_train.pkl`, `y_test.pkl` — target vectors
+
+### Log Example
+
+```
+INFO - Data loaded successfully. Shape: (145460, 23)
+INFO - Basic data preprocessing completed.
+INFO - Label encoding completed.
+INFO - Data split and persistence completed successfully.
+INFO - Data processing completed.
+```
+
+## 🧩 Integration Guidelines
+
+| Module Type        | Use `CustomException` for…                             | Use `get_logger` for…                                      | Use `DataProcessing` for…                         |
+| ------------------ | ------------------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------- |
+| Data Ingestion     | File loading failures, schema mismatches, empty files  | File paths, record counts, schema summaries                | Reading and validating raw weather data           |
+| Preprocessing      | Missing values, encoding or datetime conversion errors | Feature engineering, imputations, outlier handling         | Expanding date fields and imputing numeric values |
+| Model Training     | Invalid targets, convergence issues, NaNs in features  | Training progress, hyperparameters, metrics per epoch      | Providing clean, structured inputs for training   |
+| Evaluation         | Metric computation, output file issues                 | Validation metrics, error analysis, performance summaries  | —                                                 |
+| Inference/Serving  | Invalid payloads, missing model artefacts              | Request summaries, predicted outputs, confidence intervals | —                                                 |
+| CI/CD & Scheduling | Failed task steps, API timeouts                        | Pipeline stage logs, run durations, cloud job statuses     | —                                                 |
 
 ## ✅ In summary
 
 * `custom_exception.py` provides **clear, contextual error messages** for every exception.
 * `logger.py` enables **structured, timestamped logging** across all project modules.
+* `data_processing.py` delivers a **reproducible preprocessing pipeline** that transforms raw weather data into model-ready artefacts.
 
-Together they form the **core reliability backbone** of the **MLOps Weather Prediction** pipeline — supporting reproducibility, debugging, and transparent experiment tracking throughout the lifecycle.
+Together, they form the **core reliability and preparation layer** of the **MLOps Weather Prediction** system — supporting traceability, debugging, and consistent experiment management throughout the workflow.

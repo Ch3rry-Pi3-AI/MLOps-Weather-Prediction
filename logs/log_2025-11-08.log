@@ -1,0 +1,13 @@
+2025-11-08 11:25:55,369 - INFO - Data Processing initialised.
+2025-11-08 11:25:55,768 - INFO - Data loaded successfully. Shape: (145460, 23)
+2025-11-08 11:25:55,985 - INFO - Basic data preprocessing completed.
+2025-11-08 11:25:56,012 - INFO - Label mapping for Location: {'Adelaide': 0, 'Albury': 1, 'AliceSprings': 2, 'BadgerysCreek': 3, 'Ballarat': 4, 'Bendigo': 5, 'Brisbane': 6, 'Cairns': 7, 'Canberra': 8, 'Cobar': 9, 'CoffsHarbour': 10, 'Dartmoor': 11, 'Darwin': 12, 'GoldCoast': 13, 'Hobart': 14, 'Katherine': 15, 'Launceston': 16, 'Melbourne': 17, 'MelbourneAirport': 18, 'Mildura': 19, 'Moree': 20, 'MountGambier': 21, 'MountGinini': 22, 'Nhil': 23, 'NorahHead': 24, 'NorfolkIsland': 25, 'Nuriootpa': 26, 'PearceRAAF': 27, 'Penrith': 28, 'Perth': 29, 'PerthAirport': 30, 'Portland': 31, 'Richmond': 32, 'Sale': 33, 'SalmonGums': 34, 'Sydney': 35, 'SydneyAirport': 36, 'Townsville': 37, 'Tuggeranong': 38, 'Uluru': 39, 'WaggaWagga': 40, 'Walpole': 41, 'Watsonia': 42, 'Williamtown': 43, 'Witchcliffe': 44, 'Wollongong': 45, 'Woomera': 46}
+2025-11-08 11:25:56,040 - INFO - Label mapping for WindGustDir: {'E': 0, 'ENE': 1, 'ESE': 2, 'N': 3, 'NE': 4, 'NNE': 5, 'NNW': 6, 'NW': 7, 'S': 8, 'SE': 9, 'SSE': 10, 'SSW': 11, 'SW': 12, 'W': 13, 'WNW': 14, 'WSW': 15}
+2025-11-08 11:25:56,071 - INFO - Label mapping for WindDir9am: {'E': 0, 'ENE': 1, 'ESE': 2, 'N': 3, 'NE': 4, 'NNE': 5, 'NNW': 6, 'NW': 7, 'S': 8, 'SE': 9, 'SSE': 10, 'SSW': 11, 'SW': 12, 'W': 13, 'WNW': 14, 'WSW': 15}
+2025-11-08 11:25:56,098 - INFO - Label mapping for WindDir3pm: {'E': 0, 'ENE': 1, 'ESE': 2, 'N': 3, 'NE': 4, 'NNE': 5, 'NNW': 6, 'NW': 7, 'S': 8, 'SE': 9, 'SSE': 10, 'SSW': 11, 'SW': 12, 'W': 13, 'WNW': 14, 'WSW': 15}
+2025-11-08 11:25:56,123 - INFO - Label mapping for RainToday: {'No': 0, 'Yes': 1}
+2025-11-08 11:25:56,155 - INFO - Label mapping for RainTomorrow: {'No': 0, 'Yes': 1}
+2025-11-08 11:25:56,155 - INFO - Label encoding completed.
+2025-11-08 11:25:56,167 - INFO - Feature columns: ['Location', 'MinTemp', 'MaxTemp', 'Rainfall', 'Evaporation', 'Sunshine', 'WindGustDir', 'WindGustSpeed', 'WindDir9am', 'WindDir3pm', 'WindSpeed9am', 'WindSpeed3pm', 'Humidity9am', 'Humidity3pm', 'Pressure9am', 'Pressure3pm', 'Cloud9am', 'Cloud3pm', 'Temp9am', 'Temp3pm', 'RainToday', 'Year', 'Month', 'Day']
+2025-11-08 11:25:56,243 - INFO - Data split and persistence completed successfully.
+2025-11-08 11:25:56,248 - INFO - Data processing completed.
