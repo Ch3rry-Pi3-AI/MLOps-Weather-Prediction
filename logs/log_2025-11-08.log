@@ -38,3 +38,23 @@
 2025-11-08 11:48:29,352 - INFO - Evaluation Results — Accuracy: 0.8649 | Precision: 0.8581 | Recall: 0.8649 | F1-score: 0.8584
 2025-11-08 11:48:29,352 - INFO - Model evaluation completed successfully.
 2025-11-08 11:48:29,353 - INFO - Model training and evaluation completed successfully.
+2025-11-08 12:01:51,693 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:01:53,642 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:02:27,802 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:10:13,453 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:10:29,630 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:11:20,671 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:11:27,706 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:11:34,624 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:11:48,335 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:11:56,447 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:12:28,183 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:12:41,872 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:13:59,741 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:14:13,305 - INFO - Prediction successful: Rain Tomorrow: No
+2025-11-08 12:20:52,286 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:20:54,298 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:32:06,428 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:32:16,677 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:32:18,611 - INFO - Model loaded from artifacts/models/model.pkl
+2025-11-08 12:32:22,812 - INFO - Prediction successful: Rain Tomorrow: No

@@ -1,0 +1,251 @@
+<!-- =======================================================================
+  Weather Prediction — Will it Rain Tomorrow?
+  -----------------------------------------------------------------------
+  This template renders the user interface for the Flask web application.
+  It presents a simple form where users can enter a few weather parameters,
+  and the backend (app.py) predicts whether it will rain tomorrow.
+
+  Key Features:
+  - Clean, minimal input form for general users
+  - Smart defaults inferred server-side (sunshine, pressure, cloud, etc.)
+  - Background image overlay for aesthetic depth
+  - Responsive design handled by static/style.css
+======================================================================= -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ---------------------------- Metadata ---------------------------- -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ------------------------------ Title ------------------------------ -->
+  <title>Weather Prediction — Will it Rain Tomorrow?</title>
+
+  <!-- -------------------------- Google Fonts --------------------------- -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- ------------------------------ Styles ----------------------------- -->
+  <!-- External CSS (core layout, colors, responsive design) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+  <!-- Inline CSS to inject the background image dynamically -->
+  <style>
+    .bg-overlay {
+      background-image: url("{{ url_for('static', filename='img/app_background.jpg') }}");
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===================================================================
+    Background overlay
+    -------------------------------------------------------------------
+    Provides a fixed, slightly transparent image behind the main content.
+    The image path is resolved dynamically via Flask’s url_for().
+  =================================================================== -->
+  <div class="bg-overlay"></div>
+
+  <!-- ===================================================================
+    Main container
+    -------------------------------------------------------------------
+    All visible content is wrapped inside this container, which is
+    styled with a white card background and subtle drop shadow.
+  =================================================================== -->
+  <div class="container">
+
+    <!-- ================================================================
+      Header section
+      -----------------------------------------------------------------
+      Displays the app title and a short subtitle guiding the user.
+    ================================================================ -->
+    <header class="header">
+      <div>
+        <h2>Weather Prediction</h2>
+        <p class="subtitle">
+          Pick a location and add a few observations. We’ll estimate the
+          chance of rain tomorrow.
+        </p>
+      </div>
+    </header>
+
+    <!-- ================================================================
+      Guidance cards
+      -----------------------------------------------------------------
+      Provide quick context about input units, ranges, and the fact that
+      many additional values (e.g. sunshine, cloud cover, wind direction)
+      are inferred automatically.
+    ================================================================ -->
+    <section class="stats" aria-label="Input Guidance">
+      <h3>Input Guidance</h3>
+      <div class="stats-grid">
+        <!-- Card: Units and Ranges -->
+        <div class="stat-card">
+          <div class="stat-name">Units &amp; Ranges</div>
+          <div class="stat-line">
+            <strong>Temp:</strong> °C &nbsp; <strong>Humidity:</strong> %
+          </div>
+          <div class="stat-line">
+            <strong>Wind:</strong> km/h &nbsp; <strong>Rainfall:</strong> mm (today)
+          </div>
+        </div>
+
+        <!-- Card: Explanation of smart defaults -->
+        <div class="stat-card">
+          <div class="stat-name">Fewer Fields, Smart Defaults</div>
+          <div class="stat-line">
+            We infer sunshine, cloud, pressure, wind direction, and 9am values automatically.
+          </div>
+          <div class="stat-line">
+            If Rainfall &gt; 0.2 mm today, we’ll mark “Rain Today = Yes” under the hood.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+      Error display
+      -----------------------------------------------------------------
+      If the backend detects invalid inputs or fails to make a prediction,
+      the error message is shown here in a red alert box.
+    ================================================================ -->
+    {% if error %}
+      <div class="alert error" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <!-- ================================================================
+      Main form
+      -----------------------------------------------------------------
+      The core user input form. Each form-row holds one labeled field.
+      Fields are dynamically pre-filled using values from the Flask
+      context (inputs, ranges, choices).
+    ================================================================ -->
+    <form action="/" method="POST" class="form-grid" novalidate>
+
+      <!-- ---------------------- Location (Select) ---------------------- -->
+      <div class="form-row">
+        <label for="Location">Location</label>
+        <select id="Location" name="Location" required>
+          {% for loc in choices.locations %}
+            <option value="{{ loc }}" {% if inputs.Location == loc %}selected{% endif %}>
+              {{ loc }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- ------------------------ Date (Picker) ------------------------ -->
+      <div class="form-row">
+        <label for="Date">Date</label>
+        <input
+          id="Date"
+          name="Date"
+          type="date"
+          value="{{ inputs.Date }}"
+          required
+        />
+      </div>
+
+      <!-- ------------------- Minimum Temperature ---------------------- -->
+      <div class="form-row">
+        <label for="MinTemp">Min Temp (°C)</label>
+        <input
+          id="MinTemp"
+          name="MinTemp"
+          type="number"
+          inputmode="decimal"
+          min="{{ ranges.MinTemp.min }}"
+          max="{{ ranges.MinTemp.max }}"
+          step="{{ ranges.MinTemp.step }}"
+          value="{{ inputs.MinTemp }}"
+          required
+        />
+      </div>
+
+      <!-- ------------------- Maximum Temperature ---------------------- -->
+      <div class="form-row">
+        <label for="MaxTemp">Max Temp (°C)</label>
+        <input
+          id="MaxTemp"
+          name="MaxTemp"
+          type="number"
+          inputmode="decimal"
+          min="{{ ranges.MaxTemp.min }}"
+          max="{{ ranges.MaxTemp.max }}"
+          step="{{ ranges.MaxTemp.step }}"
+          value="{{ inputs.MaxTemp }}"
+          required
+        />
+      </div>
+
+      <!-- ---------------------- Humidity (3pm) ------------------------ -->
+      <div class="form-row">
+        <label for="Humidity3pm">Humidity 3pm (%)</label>
+        <input
+          id="Humidity3pm"
+          name="Humidity3pm"
+          type="number"
+          inputmode="decimal"
+          min="{{ ranges.Humidity3pm.min }}"
+          max="{{ ranges.Humidity3pm.max }}"
+          step="{{ ranges.Humidity3pm.step }}"
+          value="{{ inputs.Humidity3pm }}"
+          required
+        />
+      </div>
+
+      <!-- --------------------- Wind Speed (3pm) ----------------------- -->
+      <div class="form-row">
+        <label for="WindSpeed3pm">Wind Speed 3pm (km/h)</label>
+        <input
+          id="WindSpeed3pm"
+          name="WindSpeed3pm"
+          type="number"
+          inputmode="decimal"
+          min="{{ ranges.WindSpeed3pm.min }}"
+          max="{{ ranges.WindSpeed3pm.max }}"
+          step="{{ ranges.WindSpeed3pm.step }}"
+          value="{{ inputs.WindSpeed3pm }}"
+          required
+        />
+      </div>
+
+      <!-- --------------------- Rainfall Today (mm) -------------------- -->
+      <div class="form-row">
+        <label for="Rainfall">Rainfall today (mm)</label>
+        <input
+          id="Rainfall"
+          name="Rainfall"
+          type="number"
+          inputmode="decimal"
+          min="{{ ranges.Rainfall.min }}"
+          max="{{ ranges.Rainfall.max }}"
+          step="{{ ranges.Rainfall.step }}"
+          value="{{ inputs.Rainfall }}"
+        />
+      </div>
+
+      <!-- ---------------------- Submit Button ------------------------ -->
+      <button type="submit" class="btn-primary">Predict Rain Tomorrow</button>
+    </form>
+
+    <!-- ================================================================
+      Prediction result
+      -----------------------------------------------------------------
+      When the backend generates a prediction, it is displayed here
+      inside a highlighted result box.
+    ================================================================ -->
+    {% if prediction is not none %}
+      <div class="result" aria-live="polite">
+        <h3>Prediction</h3>
+        <p class="pred-label">{{ prediction }}</p>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
