@@ -1,144 +1,166 @@
-# ☁️ **Google Cloud Platform (GCP) Setup — MLOps Weather Prediction**
 
-This stage introduces **Google Cloud Platform (GCP)** configuration for the **MLOps Weather Prediction** project.
-The setup prepares the cloud infrastructure necessary for deploying containerised machine learning workflows and the **Flask weather prediction app** using **Kubernetes (GKE)**, **Artifact Registry**, and **Service Accounts** with secure IAM permissions.
+# 🌸 **MLOps Iris Classifier — End-to-End CI/CD Deployment (GitHub Actions Edition)**
 
-By completing this stage, your environment will be fully configured to build, store, and deploy Docker containers directly from your **GitHub Actions pipelines** into a **GKE Autopilot** cluster within the **us-central1 (Iowa)** region.
-
-## 🌐 Overview
-
-This GCP configuration involves five essential steps:
-
-1. Enabling required APIs
-2. Creating an Artifact Registry repository
-3. Setting up a Service Account and generating a JSON key
-4. Creating a Kubernetes Autopilot cluster
-5. Ensuring regional consistency and secure network access
-
-Each step ensures the environment is cloud-ready, secure, and aligned for **MLOps deployment**.
-
-## 1️⃣ Enable Required APIs
-
-Visit your [Google Cloud Console](https://console.cloud.google.com) and open:
-**Navigation Menu → APIs & Services → Library**
-
-Enable the following APIs:
-
-* **Kubernetes Engine API**
-* **Google Container Registry API**
-* **Compute Engine API**
-* **Identity and Access Management (IAM) API**
-* **Cloud Build API**
-* **Cloud Storage API**
-
-Once enabled, you’ll see a confirmation screen like this:
+This repository demonstrates a **complete MLOps workflow** using the classic **Iris dataset**, progressing from data preprocessing and model training to full web deployment through an automated **CI/CD (Continuous Integration and Continuous Deployment)** pipeline built with **GitHub Actions** and deployed to **Google Cloud Platform (GCP)**.
 
 <p align="center">
-  <img src="img/gcp/api_enabled.png" alt="GCP API Enabled Example" style="width:100%; max-width:720px; height:auto;"/>
+  <img src="img/flask/flask_app.gif" alt="Deployed Flask Iris Classifier Application" style="width:100%; height:auto;" />
 </p>
 
-These APIs provide the core functionality required for building, storing, and deploying your application within GCP.
+While the machine learning use case — **Iris species classification** — is intentionally simple, the project’s main objective is to showcase a **production-grade MLOps workflow** using **GitHub Actions** for automation, containerisation, and cloud deployment via **Google Kubernetes Engine (GKE)**.
 
-## 2️⃣ Create an Artifact Registry Repository
+## 🧩 **Project Overview**
 
-From the main GCP console, search for **“Artifact Registry”**.
-Click **+ Create Repository** and fill in the following details:
+This project walks through the **entire lifecycle** of a machine learning system — from raw data to live deployment — using a modular, reproducible, and scalable architecture.
+Each stage builds on the previous one, ensuring consistent execution and traceability throughout the pipeline.
 
-* **Repository name:** `mlops-weather-prediction`
-* **Region:** `us-central1 (Iowa)`
-* **Format:** Docker
-* Leave other options as default.
-* Scroll to the bottom and click **Create**.
+### 🌱 **Stage 00 — Project Setup**
+
+A structured repository layout was established, introducing:
+
+* Core directories: `src/`, `pipeline/`, `artifacts/`, and `img/`
+* Dependency management with **`uv`** for reproducible environments
+* Editable package installation via `setup.py`
+* Logging and exception-handling frameworks for traceable experimentation
+
+This created the foundation for the remaining stages.
+
+### 💾 **Stage 01 — Data Processing**
+
+The **`data_processing.py`** module handled the complete preprocessing workflow:
+
+* Loading and cleaning the Iris dataset
+* Handling outliers and missing values
+* Splitting data into training and test sets
+* Persisting processed artefacts (`X_train.pkl`, `y_test.pkl`, etc.)
+
+All transformations were reproducible and logged to ensure consistent results.
+
+### 🧠 **Stage 02 — Model Training**
+
+The **`model_training.py`** module trained a **Decision Tree Classifier** and performed model evaluation, generating key metrics:
+
+* Accuracy, precision, recall, and F1-score
+* A confusion matrix (`confusion_matrix.png`)
+* A serialised model file (`model.pkl`)
+
+Exception handling and centralised logging ensured reliability during training.
+
+### 🌸 **Stage 03 — Flask Application**
+
+A **Flask web interface** was built to deploy the trained model as an interactive web app.
+Users can input sepal and petal dimensions and receive predictions in real time.
+
+This stage introduced:
+
+* A responsive HTML front-end (`templates/index.html`)
+* CSS styling (`static/style.css`)
+* Flask integration via `app.py` for live inference
 
 <p align="center">
-  <img src="img/gcp/create_repo.png" alt="Create GCP Artifact Registry Repository" style="width:100%; max-width:720px; height:auto;"/>
+  <img src="img/flask/flask_app.png" alt="Flask Iris Classifier Application" style="width:100%; height:auto;" />
 </p>
 
-This repository securely stores the Docker images for your Flask app and other pipeline artefacts that will later be deployed via GitHub Actions.
+### ⚙️ **Stage 04 — Training Pipeline**
 
-## 3️⃣ Create a Service Account
+The **`pipeline/training_pipeline.py`** script unified **data processing** and **model training** into a single orchestrated pipeline, automating every key step.
 
-Go to **Navigation Menu → IAM & Admin → Service Accounts** and click **+ Create Service Account**.
+It provides a reproducible execution workflow that can be triggered locally or by external automation tools (e.g. CI/CD).
+This was the bridge between local experimentation and cloud automation.
 
-1. **Name:** `mlops-weather-prediction`
-2. Assign the following permissions under **Roles**:
+### ☁️ **Stage 05 — Google Cloud Platform (GCP) Setup**
 
-   * Artifact Registry Administrator
-   * Kubernetes Engine Developer
-   * Service Account User
-   * Storage Admin
-   * Compute Viewer
+The cloud infrastructure was configured within **Google Cloud Platform** to support containerised ML workloads.
+
+Key setup tasks included:
+
+* Enabling APIs for **Kubernetes Engine**, **Artifact Registry**, and **Compute Engine**
+* Creating an **Artifact Registry** repository (`mlops-iris-iii`) in `us-central1`
+* Generating a **Service Account** with roles for Artifact Registry and Kubernetes deployment
+* Creating a **GKE Autopilot cluster** (`autopilot-cluster-1`) for managed workloads
+
+This established the secure, scalable backbone for automated deployment.
+
+### 🚀 **Stage 06 — CI/CD Deployment (GitHub Actions → GCP)**
+
+Finally, the project integrated **GitHub Actions** to automate the build-and-deploy workflow.
+Each push to the `main` branch triggers the pipeline defined in **`.github/workflows/deploy.yml`**.
+
+The CI/CD sequence:
+
+1. **Build** — Create a Docker image for the Flask app using the `Dockerfile`
+2. **Push** — Upload the image to **Google Artifact Registry**
+3. **Deploy** — Apply `kubernetes-deployment.yaml` to **GKE** to update the live application
+
+The pipeline uses the official **`google-github-actions`** modules for authentication, image management, and Kubernetes deployment.
 
 <p align="center">
-  <img src="img/gcp/permissions.png" alt="Assign IAM Permissions" style="width:100%; max-width:720px; height:auto;"/>
+  <img src="img/github_actions/workflow_success.png" alt="GitHub Actions Workflow Success" style="width:100%; height:auto;" />
 </p>
 
-Click **Create**. Once done, locate your new service account, click **Actions → Manage Keys → Add Key → Create new key**, and choose **JSON** as the key type.
+Once completed, the application becomes publicly available through the external **LoadBalancer endpoint** exposed by GKE.
 
-<p align="center">
-  <img src="img/gcp/create_key.png" alt="Create Service Account Key" style="width:100%; max-width:720px; height:auto;"/>
-</p>
+## 💡 **Why GitHub Actions?**
 
-Click **Create** to download your JSON key file.
-Keep this file safe — it will later be used in your GitHub Actions environment to authenticate the pipeline with GCP services.
+GitHub Actions was chosen for its **tight integration**, **ease of setup**, and **robust cloud support**.
 
-## 4️⃣ Create a Kubernetes Autopilot Cluster
+### ✅ **Key Advantages**
 
-Search for **“Kubernetes Engine”** in the GCP Console, then go to **Clusters** from the left sidebar.
+* **Native integration** — workflows trigger automatically on push or pull requests
+* **Simple YAML configuration** stored under `.github/workflows/`
+* **Secure secret management** through repository settings
+* **First-class GCP support** with official authentication actions
+* **Zero-infrastructure overhead** — runs on GitHub-hosted runners
+* **Fast, scalable execution** — ideal for iterative machine learning workflows
 
-<p align="center">
-  <img src="img/gcp/cluster.png" alt="Kubernetes Engine Clusters" style="width:100%; max-width:720px; height:auto;"/>
-</p>
+These features make **GitHub Actions** a clean, lightweight, and powerful choice for modern CI/CD in MLOps.
 
-Click **Create Cluster** and select **Autopilot** mode (recommended for managed workloads).
+## 🗂️ **Final Project Structure**
 
-<p align="center">
-  <img src="img/gcp/autopilot_cluster.png" alt="Autopilot Cluster Option" style="width:100%; max-width:720px; height:auto;"/>
-</p>
-
-In the **Cluster Basics** section:
-
-* **Cluster name:** `autopilot-cluster-1`
-* **Region:** `us-central1` (must match your Artifact Registry region)
-
-Under **Networking**, make sure both options are checked:
-
-* ✅ **Access using DNS**
-* ✅ **Access using IPv4 addresses**
-
-<p align="center">
-  <img src="img/gcp/networking.png" alt="Kubernetes Networking Configuration" style="width:100%; max-width:720px; height:auto;"/>
-</p>
-
-Keep advanced options as defaults and click **Create**.
-Cluster provisioning may take a few minutes. Wait until it reaches a **Running** state before continuing.
-
-## 5️⃣ Verify and Align Regions
-
-After your cluster and repository are created, verify that both share the **same region** (`us-central1`).
-This consistency ensures low latency and avoids cross-region deployment errors during CI/CD builds.
-
-You can confirm this by checking:
-
-```bash
-gcloud artifacts repositories list
-gcloud container clusters list
+```text
+mlops_iris_classifier/
+├── .venv/                          # 🧩 Local virtual environment (created by uv)
+├── artifacts/                      # 💾 Raw, processed, and model artefacts
+│   ├── raw/
+│   ├── processed/
+│   └── models/
+├── pipeline/
+│   └── training_pipeline.py         # Unified data processing + model training
+├── src/
+│   ├── data_processing.py
+│   ├── model_training.py
+│   ├── logger.py
+│   └── custom_exception.py
+├── templates/
+│   └── index.html                  # Flask UI
+├── static/
+│   ├── style.css
+│   └── img/app_background.jpg
+├── img/
+│   ├── flask/flask_app.gif         # Animated Flask app demo
+│   ├── github_actions/             # Screenshots for GitHub + GCP setup
+│   └── gcp/
+├── Dockerfile                      # 🐳 Container image definition
+├── kubernetes-deployment.yaml      # ☸️ Kubernetes deployment specification
+├── .github/
+│   └── workflows/
+│       └── deploy.yml              # ⚙️ GitHub Actions CI/CD pipeline
+├── app.py                          # Flask application entry point
+├── pyproject.toml                  # Project metadata and dependencies
+├── setup.py                        # Editable install support
+└── requirements.txt                # Python dependencies
 ```
 
-## ✅ In Summary
+## 🌐 **End-to-End Workflow Summary**
 
-By the end of this stage:
+1. **Data Processing** → clean, split, and persist artefacts
+2. **Model Training** → train and evaluate the Decision Tree Classifier
+3. **Flask Application** → serve predictions via web interface
+4. **Pipeline Orchestration** → unify preprocessing + training
+5. **GCP Setup** → configure cluster, registry, and permissions
+6. **CI/CD Deployment** → automate build → push → deploy to GKE
 
-* All critical **GCP APIs** are active.
-* A secure **Artifact Registry** (`mlops-weather-prediction`) is ready to store Docker images.
-* A **Service Account** and JSON key are created for CI/CD authentication.
-* A **GKE Autopilot cluster** (`autopilot-cluster-1`) has been provisioned in `us-central1`.
-* Regional and network configurations are aligned for deployment.
+## ✅ **In Summary**
 
-Your GCP environment is now ready for:
-
-* 🔁 Automated builds via **GitHub Actions**
-* 🐳 Containerised **Flask app deployments**
-* ☁️ Scalable MLOps infrastructure for retraining and continuous delivery
-
-This setup completes the **cloud infrastructure foundation** for the **MLOps Weather Prediction** project — enabling seamless, secure, and reproducible deployments to Google Cloud.
+This project transforms a simple Iris classification task into a **fully automated MLOps pipeline** using **GitHub Actions** and **Google Cloud Platform**.
+It demonstrates how to take a traditional ML workflow — data, model, and app — and operationalise it through a reproducible, cloud-native CI/CD system that delivers scalable, production-ready deployments with every code push.
