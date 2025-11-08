@@ -1,100 +1,103 @@
-# 🌦️ **Data Processing — MLOps Weather Prediction**
+# ⚙️ **Model Training — MLOps Weather Prediction**
 
-This branch builds upon the **initial setup** by introducing the **`data_processing.py`** module inside `src/`.
-It marks the **first executable workflow stage** of the **MLOps Weather Prediction** pipeline — responsible for loading raw weather data, cleaning and transforming it, encoding categorical features, and saving train/test splits for model training.
+This branch advances the **MLOps Weather Prediction** project by introducing the **`model_training.py`** module inside `src/`.
+It represents the **second executable workflow stage** of the pipeline — focusing on **model training**, **evaluation**, and **persistence** using the preprocessed datasets generated in the previous data processing stage.
 
 ## 🧩 **Overview**
 
-The `DataProcessing` class implements a **reproducible preprocessing pipeline** with integrated logging and unified exception handling.
-It prepares clean, structured datasets ready for downstream weather forecasting models.
+The `ModelTraining` class implements a **reproducible training and evaluation pipeline** built on **XGBoost**.
+It loads the processed artefacts, trains a gradient-boosted tree classifier, evaluates performance using multiple metrics, and saves the trained model for later inference or deployment.
 
 ### 🔍 Core Responsibilities
 
-| Stage | Operation          | Description                                                                               |
-| ----: | ------------------ | ----------------------------------------------------------------------------------------- |
-|   1️⃣ | **Load Data**      | Reads input CSV from `artifacts/raw/weather_data.csv`.                                    |
-|   2️⃣ | **Preprocess**     | Expands `Date` into `Year`, `Month`, and `Day`, imputes missing values.                   |
-|   3️⃣ | **Label Encode**   | Converts categorical columns (e.g., wind directions, rain indicators) into numeric codes. |
-|   4️⃣ | **Split Data**     | Creates 80/20 train/test splits for features and target (`RainTomorrow`).                 |
-|   5️⃣ | **Save Artefacts** | Writes `X_train.pkl`, `X_test.pkl`, `y_train.pkl`, and `y_test.pkl` to disk.              |
+| Stage | Operation          | Description                                                                                     |
+| ----: | ------------------ | ----------------------------------------------------------------------------------------------- |
+|   1️⃣ | **Load Data**      | Loads `X_train.pkl`, `X_test.pkl`, `y_train.pkl`, and `y_test.pkl` from `artifacts/processed/`. |
+|   2️⃣ | **Train Model**    | Fits an `XGBClassifier` on the training data.                                                   |
+|   3️⃣ | **Save Model**     | Serialises the trained model as `model.pkl` under `artifacts/models/`.                          |
+|   4️⃣ | **Evaluate Model** | Computes accuracy, precision, recall, and F1-score using test data.                             |
 
 ## 🗂️ **Updated Project Structure**
 
 ```text
 mlops_weather_prediction/
-├── .venv/                          # 🧩 Local virtual environment (created by uv)
+├── .venv/                           # 🧩 Local virtual environment (created by uv)
 ├── artifacts/
 │   ├── raw/
-│   │   └── weather_data.csv        # 🌦️ Input weather dataset
-│   └── processed/                  # 💾 Output directory for processed data
-│       ├── X_train.pkl
-│       ├── X_test.pkl
-│       ├── y_train.pkl
-│       └── y_test.pkl
-├── mlops_weather_prediction.egg-info/ # 📦 Package metadata (auto-generated)
-├── pipeline/                       # ⚙️ Pipeline orchestration (future stage)
+│   │   └── weather_data.csv         # 🌦️ Input weather dataset
+│   ├── processed/                   # 💾 Data prepared by the preprocessing stage
+│   │   ├── X_train.pkl
+│   │   ├── X_test.pkl
+│   │   ├── y_train.pkl
+│   │   └── y_test.pkl
+│   └── models/                      # 🧠 Trained model artefacts
+│       └── model.pkl
+├── pipeline/                        # ⚙️ Workflow orchestration (future automation)
 ├── src/
 │   ├── __init__.py
-│   ├── custom_exception.py         # Unified and detailed exception handling
-│   ├── logger.py                   # Centralised logging configuration
-│   └── data_processing.py          # 🌦️ End-to-end weather data preparation
-├── static/                         # 🌐 Visual assets (optional)
-├── templates/                      # 🧩 Placeholder for web/API templates
-├── .gitignore                      # 🚫 Git ignore rules
-├── .python-version                 # 🐍 Python version pin
-├── pyproject.toml                  # ⚙️ Project metadata and uv configuration
-├── requirements.txt                # 📦 Python dependencies
-├── setup.py                        # 🔧 Editable install support
-└── uv.lock                         # 🔒 Locked dependency versions
+│   ├── custom_exception.py          # Unified and detailed exception handling
+│   ├── logger.py                    # Centralised logging configuration
+│   ├── data_processing.py           # 🌦️ Weather data preparation pipeline
+│   └── model_training.py            # ⚙️ Model training, evaluation, and persistence
+├── static/                          # 🌐 Visual assets (optional)
+├── templates/                       # 🧩 Placeholder for web/API templates
+├── .gitignore                       # 🚫 Git ignore rules
+├── .python-version                  # 🐍 Python version pin
+├── pyproject.toml                   # ⚙️ Project metadata and uv configuration
+├── requirements.txt                 # 📦 Python dependencies
+├── setup.py                         # 🔧 Editable install support
+└── uv.lock                          # 🔒 Locked dependency versions
 ```
 
-## ⚙️ **How to Run the Data Processing Module**
+## ⚙️ **How to Run the Model Training Module**
 
-After activating the virtual environment and ensuring your dataset is located at `artifacts/raw/weather_data.csv`, run:
+After successfully running the data processing stage, ensure that the preprocessed artefacts exist in `artifacts/processed/`, then execute:
 
 ```bash
-python src/data_processing.py
+python src/model_training.py
 ```
 
 ### ✅ **Expected Successful Output**
 
 ```console
-2025-11-08 11:25:55,985 - INFO - Basic data preprocessing completed.
-2025-11-08 11:25:56,012 - INFO - Label mapping for Location: {'Adelaide': 0, 'Albury': 1, 'AliceSprings': 2, ...}
-2025-11-08 11:25:56,071 - INFO - Label mapping for WindDir9am: {'E': 0, 'ENE': 1, 'ESE': 2, ...}
-2025-11-08 11:25:56,123 - INFO - Label mapping for RainToday: {'No': 0, 'Yes': 1}
-2025-11-08 11:25:56,155 - INFO - Label mapping for RainTomorrow: {'No': 0, 'Yes': 1}
-2025-11-08 11:25:56,155 - INFO - Label encoding completed.
-2025-11-08 11:25:56,167 - INFO - Feature columns: ['Location', 'MinTemp', 'MaxTemp', ... 'Month', 'Day']
-2025-11-08 11:25:56,243 - INFO - Data split and persistence completed successfully.
-2025-11-08 11:25:56,248 - INFO - Data processing completed.
+2025-11-08 12:04:02,584 - INFO - Model Training initialised...
+2025-11-08 12:04:02,611 - INFO - Data loaded successfully...
+2025-11-08 12:04:03,221 - INFO - Training and saving of model done...
+2025-11-08 12:04:03,778 - INFO - Training model score : 0.91
+2025-11-08 12:04:03,891 - INFO - Accuracy : 0.86 ; Precision : 0.85 ; Recall : 0.84 : F1-Score : 0.84
+2025-11-08 12:04:03,912 - INFO - Model evaluation done..
+2025-11-08 12:04:03,917 - INFO - Model training and evaluation completed successfully.
 ```
 
 This confirms that:
 
-* The raw dataset was successfully read and parsed.
-* Missing values were imputed and date features were expanded.
-* Categorical columns were encoded into numeric representations.
-* Train/test datasets were created and saved under `artifacts/processed/`.
+* The processed data was loaded successfully.
+* The XGBoost model was trained and persisted as `model.pkl`.
+* Evaluation metrics were computed and logged clearly.
 
 ## 🧠 **Implementation Highlights**
 
+* **Machine Learning Algorithm:**
+  Uses `XGBClassifier` from **XGBoost**, a robust gradient-boosting algorithm suited for tabular datasets like weather data.
+
 * **Integrated Logging** via `src/logger.py`
-  Each step logs detailed, timestamped progress messages for full pipeline traceability.
+  Logs all major operations — including data loading, training progress, and metric results — with timestamps for full reproducibility.
 
 * **Unified Exception Handling** via `src/custom_exception.py`
-  Any failure during data loading or transformation raises structured, context-rich errors.
+  Ensures consistent, contextualised error reporting in case of runtime or I/O failures.
 
-* **Modular, Extensible Design**
-  The `DataProcessing` class is importable and designed for integration with later stages — including training, evaluation, and Kubeflow orchestration.
+* **Persisted Artefacts:**
+  Trained models are saved under `artifacts/models/` to be reused for evaluation, inference, or deployment stages.
 
 ## 🧩 **Integration Guidelines**
 
-| File                      | Purpose                                                      |
-| ------------------------- | ------------------------------------------------------------ |
-| `src/data_processing.py`  | Executes the weather data preprocessing workflow end-to-end. |
-| `src/custom_exception.py` | Provides consistent, traceable error reporting.              |
-| `src/logger.py`           | Ensures structured, timestamped logs for reproducibility.    |
+| File                      | Purpose                                                  |
+| ------------------------- | -------------------------------------------------------- |
+| `src/model_training.py`   | Trains, evaluates, and saves the XGBoost model.          |
+| `src/data_processing.py`  | Supplies preprocessed training and testing data.         |
+| `src/custom_exception.py` | Provides structured, traceable error handling.           |
+| `src/logger.py`           | Records all workflow steps and metrics for transparency. |
 
 ✅ **In summary:**
-This branch transforms the repository from a static scaffold into a **functional preprocessing stage** for the Weather Prediction pipeline — producing reproducible artefacts, clean datasets, and structured logs that will power the upcoming **model training and evaluation stages**.
+This branch transforms the project into a **fully functional training stage** — integrating data artefacts from preprocessing, training an XGBoost model, and generating key evaluation metrics.
+It serves as the foundation for the upcoming **model evaluation**, **deployment**, and **CI/CD automation** phases in the **MLOps Weather Prediction** pipeline.
