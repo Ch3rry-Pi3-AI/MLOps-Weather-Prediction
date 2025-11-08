@@ -11,3 +11,10 @@
 2025-11-08 11:25:56,167 - INFO - Feature columns: ['Location', 'MinTemp', 'MaxTemp', 'Rainfall', 'Evaporation', 'Sunshine', 'WindGustDir', 'WindGustSpeed', 'WindDir9am', 'WindDir3pm', 'WindSpeed9am', 'WindSpeed3pm', 'Humidity9am', 'Humidity3pm', 'Pressure9am', 'Pressure3pm', 'Cloud9am', 'Cloud3pm', 'Temp9am', 'Temp3pm', 'RainToday', 'Year', 'Month', 'Day']
 2025-11-08 11:25:56,243 - INFO - Data split and persistence completed successfully.
 2025-11-08 11:25:56,248 - INFO - Data processing completed.
+2025-11-08 11:40:24,853 - INFO - Model Training initialised.
+2025-11-08 11:40:24,915 - INFO - Preprocessed data loaded successfully.
+2025-11-08 11:40:25,475 - INFO - Model trained and saved successfully at artifacts/models\model.pkl
+2025-11-08 11:40:25,523 - INFO - Training model score: 0.8991
+2025-11-08 11:40:25,557 - INFO - Evaluation Results — Accuracy: 0.8649 | Precision: 0.8581 | Recall: 0.8649 | F1-score: 0.8584
+2025-11-08 11:40:25,557 - INFO - Model evaluation completed successfully.
+2025-11-08 11:40:25,558 - INFO - Model training and evaluation completed successfully.
