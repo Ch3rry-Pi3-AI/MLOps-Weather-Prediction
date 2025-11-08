@@ -31,7 +31,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GKE_CLUSTER: autopilot-cluster-1
   GKE_REGION: us-central1
-  DEPLOYMENT_NAME: mlops-iris-iii
+  DEPLOYMENT_NAME: mlops-weather-prediction
   REPOSITORY: us-central1-docker.pkg.dev/sacred-garden-474511-b9/mlops-weather-prediction
   IMAGE: us-central1-docker.pkg.dev/sacred-garden-474511-b9/mlops-weather-prediction/mlops-weather-prediction
 
